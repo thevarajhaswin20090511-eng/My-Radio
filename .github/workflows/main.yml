@@ -10,28 +10,17 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 355
     steps:
-      - name: Install Liquidsoap and gdown
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y liquidsoap python3-pip
-          pip install gdown
+      - name: Checkout Songs
+        uses: actions/checkout@v4
 
-      - name: Download Songs from Google Drive
-        run: |
-          mkdir -p songs
-          gdown --folder "https://google.com" -O songs --remaining-ok
-          find ./songs -type f \( -iname "*.mp3" -o -iname "*.m4a" -o -iname "*.wav" \) > playlist.m3u
-          echo "Total songs found: $(wc -l < playlist.m3u)"
-          if [ ! -s playlist.m3u ]; then
-            echo "ERROR: Google Drive-இலிருந்து பாடல்கள் எதுவும் டவுன்லோட் ஆகவில்லை!"
-            exit 1
-          fi
+      - name: Install Liquidsoap
+        run: sudo apt-get update && sudo apt-get install -y liquidsoap
 
       - name: Start Streaming to Listen2MyRadio
         run: |
           liquidsoap '
             settings.log.stdout.set(true)
-            s = playlist(mode="randomize", "playlist.m3u")
+            s = playlist(mode="randomize", ".")
             s = mksafe(s)
             output.shoutcast(
               %mp3(bitrate=128),
