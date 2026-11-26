@@ -1,0 +1,24 @@
+name: 24/7 Radio Stream
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 */6 * * *'
+
+jobs:
+  stream:
+    runs-on: ubuntu-latest
+    timeout-minutes: 355
+    steps:
+      - name: Checkout Songs
+        uses: actions/checkout@v4
+
+      - name: Install FFmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
+      - name: Start Streaming to Listen2MyRadio
+        env:
+          PASS: ${{ secrets.STREAM_PASS }}
+        run: |
+          ls *.mp3 | sed "s/^/file '/;s/$/'/" > playlist.txt
+          ffmpeg -re -stream_loop -1 -f concat -safe 0 -i playlist.txt -c:a libmp3lame -b:a 128k -content_type audio/mpeg -f mp3 icecast://source:${PASS}@://listen2myradio.com
