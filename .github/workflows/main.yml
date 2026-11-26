@@ -13,24 +13,22 @@ jobs:
       - name: Checkout Songs
         uses: actions/checkout@v4
 
-      - name: Install Stream Tools
-        run: sudo apt-get update && sudo apt-get install -y ffmpeg python3
+      - name: Install Liquidsoap
+        run: sudo apt-get update && sudo apt-get install -y liquidsoap
 
       - name: Start Streaming to Listen2MyRadio
         run: |
-          ls *.mp3 | sed "s/^/file '/;s/$/'/" > playlist.txt
-          python3 -c "
-          import socket, subprocess, time
-          s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-          s.connect(('78.129.237.51', 11852))
-          s.sendall(b'Kingofwin\r\n')
-          resp = s.recv(1024)
-          print('Server response:', resp)
-          if b'OK' in resp:
-              s.sendall(b'icy-name:HaswinPrince Radio\r\nicy-genre:Tamil\r\nicy-pub:1\r\nicy-br:128\r\n\r\n')
-              p = subprocess.Popen(['ffmpeg', '-re', '-stream_loop', '-1', '-f', 'concat', '-safe', '0', '-i', 'playlist.txt', '-c:a', 'libmp3lame', '-b:a', '128k', '-f', 'mp3', '-'], stdout=subprocess.PIPE)
-              while True:
-                  data = p.stdout.read(4096)
-                  if not data: break
-                  s.sendall(data)
-          "
+          liquidsoap '
+            settings.log.stdout.set(true)
+            s = playlist(mode="randomize", ".")
+            s = mksafe(s)
+            output.shoutcast(
+              %mp3(bitrate=128),
+              host="uk16freenew.listen2myradio.com",
+              port=11851,
+              password="Kingofwin",
+              name="HaswinPrince Radio",
+              genre="Tamil",
+              s
+            )
+          '
