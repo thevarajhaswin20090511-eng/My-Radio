@@ -17,8 +17,6 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y ffmpeg
 
       - name: Start Streaming to Listen2MyRadio
-        env:
-          PASS: ${{ secrets.STREAM_PASS }}
         run: |
           ls *.mp3 | sed "s/^/file '/;s/$/'/" > playlist.txt
-          ffmpeg -re -stream_loop -1 -f concat -safe 0 -i playlist.txt -c:a libmp3lame -b:a 128k -content_type audio/mpeg -f mp3 icecast://source:${PASS}@://listen2myradio.com
+          ffmpeg -re -stream_loop -1 -f concat -safe 0 -i playlist.txt -c:a libmp3lame -b:a 128k -content_type audio/mpeg -f mp3 icecast://source:Kingofwin@78.129.237.51:11851/stream
