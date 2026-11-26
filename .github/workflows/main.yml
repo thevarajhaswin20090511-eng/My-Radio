@@ -10,17 +10,22 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 355
     steps:
-      - name: Checkout Songs
-        uses: actions/checkout@v4
+      - name: Install Liquidsoap and gdown
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y liquidsoap python3-pip
+          pip install gdown
 
-      - name: Install Liquidsoap
-        run: sudo apt-get update && sudo apt-get install -y liquidsoap
+      - name: Download Songs from Google Drive
+        run: |
+          mkdir -p songs
+          gdown --folder "https://google.com" -O songs --remaining-ok
 
       - name: Start Streaming to Listen2MyRadio
         run: |
           liquidsoap '
             settings.log.stdout.set(true)
-            s = playlist(mode="randomize", ".")
+            s = playlist(mode="randomize", "./songs")
             s = mksafe(s)
             output.shoutcast(
               %mp3(bitrate=128),
