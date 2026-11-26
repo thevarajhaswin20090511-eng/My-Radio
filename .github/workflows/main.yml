@@ -24,9 +24,10 @@ jobs:
             s = mksafe(s)
             output.shoutcast(
               %mp3(bitrate=128),
-              host="://listen2myradio.com",
+              host="uk16freenew.listen2myradio.com",
               port=11851,
               password="Kingofwin",
+              sid=1,
               name="HaswinPrince Radio",
               genre="Tamil",
               s
