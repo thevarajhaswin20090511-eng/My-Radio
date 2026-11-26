@@ -20,16 +20,22 @@ jobs:
         run: |
           mkdir -p songs
           gdown --folder "https://google.com" -O songs --remaining-ok
+          find ./songs -type f \( -iname "*.mp3" -o -iname "*.m4a" -o -iname "*.wav" \) > playlist.m3u
+          echo "Total songs found: $(wc -l < playlist.m3u)"
+          if [ ! -s playlist.m3u ]; then
+            echo "ERROR: Google Drive-இலிருந்து பாடல்கள் எதுவும் டவுன்லோட் ஆகவில்லை!"
+            exit 1
+          fi
 
       - name: Start Streaming to Listen2MyRadio
         run: |
           liquidsoap '
             settings.log.stdout.set(true)
-            s = playlist(mode="randomize", "./songs")
+            s = playlist(mode="randomize", "playlist.m3u")
             s = mksafe(s)
             output.shoutcast(
               %mp3(bitrate=128),
-              host="uk16freenew.listen2myradio.com",
+              host="://listen2myradio.com",
               port=11851,
               password="Kingofwin",
               name="HaswinPrince Radio",
